@@ -316,12 +316,21 @@ class TranscriptionManager {
     }
 
     /**
-     * Envia transcrição para outro peer
+     * Envia transcrição para outro peer (COM ROOMID)
      */
     sendTranscriptionToPeer(transcription, targetUserName) {
         log('📤 Enviando transcrição para', targetUserName);
         
+        // Pegar roomId da variável global definida em room.js
+        const roomId = typeof window.currentRoomId !== 'undefined' ? window.currentRoomId : null;
+        
+        if (!roomId) {
+            logError('❌ roomId não definido ao enviar transcrição');
+            return;
+        }
+        
         this.socket.emit('sendTranscriptionToPeer', {
+            roomId: roomId,  // ✅ Incluir roomId
             transcription: transcription,
             from: userName, // variável global
             to: targetUserName

@@ -23,6 +23,13 @@ const CONFIG = {
         TOGGLE_BUTTON_ID: 'toggle-transcription'
     },
     
+    // Configurações de Room
+    ROOM: {
+        EXPIRATION_TIME: 5 * 60 * 1000,  // 5 minutos em ms
+        MAX_PARTICIPANTS: 2,              // Host + 1 participante
+        ALLOW_RECONNECTION: true          // Permitir reconexão
+    },
+    
     // Debug
     DEBUG: true
 };
@@ -40,4 +47,11 @@ const logError = (...args) => {
 
 const logWarning = (...args) => {
     console.warn('[TRANSCRIPTION WARNING]', ...args);
+};
+
+// Helper para Room logs
+const logRoom = (...args) => {
+    if (CONFIG.DEBUG) {
+        console.log('[ROOM]', ...args);
+    }
 };
