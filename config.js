@@ -1,0 +1,43 @@
+// config.js - Configurações centralizadas para transcrição
+
+const CONFIG = {
+    // OpenAI Realtime API (via proxy backend)
+    OPENAI: {
+        // API Key agora está no backend por segurança!
+        MODEL: 'gpt-4o-realtime-preview-2024-12-17'
+    },
+    
+    // Configurações de Áudio
+    AUDIO: {
+        SAMPLE_RATE: 24000,        // OpenAI espera 24kHz
+        CHANNELS: 1,               // Mono
+        FORMAT: 'pcm16',           // PCM 16-bit
+        BUFFER_SIZE: 4096,         // Tamanho do buffer de processamento
+        CHUNK_DURATION_MS: 100     // Enviar chunks a cada 100ms
+    },
+    
+    // Configurações de UI
+    UI: {
+        TRANSCRIPTION_INPUT_ID: 'text-input-transcription',
+        STATUS_INDICATOR_ID: 'transcription-status',
+        TOGGLE_BUTTON_ID: 'toggle-transcription'
+    },
+    
+    // Debug
+    DEBUG: true
+};
+
+// Helper para logs
+const log = (...args) => {
+    if (CONFIG.DEBUG) {
+        console.log('[TRANSCRIPTION]', ...args);
+    }
+};
+
+const logError = (...args) => {
+    console.error('[TRANSCRIPTION ERROR]', ...args);
+};
+
+const logWarning = (...args) => {
+    console.warn('[TRANSCRIPTION WARNING]', ...args);
+};

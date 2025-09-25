@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>WebRTC Video Chat com Transcrição</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <link rel='stylesheet' type='text/css' media='screen' href='styles.css'>
+</head>
+<body>
+    <div class="container">
+        <div class="row mb-3 mt-3 justify-content-md-center">
+            <div id="user-name"></div>
+            <button id="call" class="btn btn-primary col-1">Call!</button>
+            <button id="hangup" class="col-1" class="btn btn-primary">Hangup</button>
+            <div id="answer" class="col"></div>
+        </div>
+        
+        <div id="videos">
+            <div id="video-wrapper">
+                <div id="waiting" class="btn btn-warning">Waiting for answer...</div>
+                <video class="video-player" id="local-video" autoplay playsinline controls></video>
+            </div>
+            <video class="video-player" id="remote-video" autoplay playsinline controls></video>
+        </div>
+
+        <!-- ÁREA DE TRANSCRIÇÃO -->
+        <div class="mt-4 card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">🎤 Transcrição em Tempo Real</h5>
+                <div>
+                    <span id="transcription-status" class="badge bg-secondary">Desconectado</span>
+                    <button id="toggle-transcription" class="btn btn-sm btn-success ms-2">
+                        Ativar Transcrição
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label for="text-input-transcription" class="form-label">Texto Transcrito:</label>
+                    <textarea 
+                        id="text-input-transcription" 
+                        class="form-control" 
+                        rows="5" 
+                        placeholder="A transcrição aparecerá aqui..." 
+                        readonly>
+                    </textarea>
+                </div>
+                <div class="text-muted small">
+                    <strong>Status:</strong> <span id="transcription-info">Aguardando conexão...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script src='config.js'></script>
+    <script src='utils.js'></script>
+    <script src='audioProcessor.js'></script>
+    <script src='transcription.js'></script>
+    <script src='scripts.js'></script>
+    <script src='socketListeners.js'></script>
+    
+    <!-- Script de teste da conexão -->
+    <script>
+        // Testar conexão ao carregar a página
+        document.addEventListener('DOMContentLoaded', async () => {
+            log('Página carregada, testando conexão...');
+            
+            // Adicionar listener ao botão de toggle
+            const toggleBtn = document.getElementById('toggle-transcription');
+            const statusBadge = document.getElementById('transcription-status');
+            const statusInfo = document.getElementById('transcription-info');
+            
+            toggleBtn.addEventListener('click', async () => {
+                if (!transcriptionManager.isConnected) {
+                    // CONECTAR
+                    toggleBtn.disabled = true;
+                    toggleBtn.textContent = 'Conectando...';
+                    statusInfo.textContent = 'Estabelecendo conexão com OpenAI...';
+                    
+                    const success = await transcriptionManager.init();
+                    
+                    if (success) {
+                        statusBadge.className = 'badge bg-success';
+                        statusBadge.textContent = 'Conectado';
+                        toggleBtn.textContent = 'Iniciar Transcrição';
+                        toggleBtn.className = 'btn btn-sm btn-primary ms-2';
+                        statusInfo.textContent = 'Clique em "Call" para iniciar uma chamada e depois clique aqui para começar a transcrever';
+                    } else {
+                        statusBadge.className = 'badge bg-danger';
+                        statusBadge.textContent = 'Erro';
+                        toggleBtn.textContent = 'Tentar Novamente';
+                        statusInfo.textContent = 'Falha na conexão. Verifique a API key.';
+                    }
+                    
+                    toggleBtn.disabled = false;
+                } else if (!transcriptionManager.isTranscribing) {
+                    // INICIAR TRANSCRIÇÃO
+                    transcriptionManager.start();
+                    statusBadge.className = 'badge bg-danger';
+                    statusBadge.textContent = '🎤 Transcrevendo';
+                    toggleBtn.textContent = 'Parar Transcrição';
+                    toggleBtn.className = 'btn btn-sm btn-warning ms-2';
+                    statusInfo.textContent = 'Fale algo... a transcrição aparecerá abaixo';
+                } else {
+                    // PARAR TRANSCRIÇÃO
+                    transcriptionManager.stop();
+                    statusBadge.className = 'badge bg-success';
+                    statusBadge.textContent = 'Conectado';
+                    toggleBtn.textContent = 'Iniciar Transcrição';
+                    toggleBtn.className = 'btn btn-sm btn-primary ms-2';
+                    statusInfo.textContent = 'Transcrição pausada. Clique para continuar';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
