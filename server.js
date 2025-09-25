@@ -1,3 +1,6 @@
+// Carregar variáveis de ambiente
+require('dotenv').config();
+
 const fs = require('fs');
 const https = require('https');
 const express = require('express');
@@ -5,13 +8,20 @@ const app = express();
 const socketio = require('socket.io');
 const WebSocket = require('ws'); // Instalar: npm install ws
 
-// Carregar variáveis de ambiente do .env
-require('dotenv').config();
-
 app.use(express.static(__dirname));
 
-// Chave da API OpenAI (lida do .env)
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY; // defina em .env
+// Chave da API OpenAI (agora do .env)
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+
+// Validar se a API key existe
+if (!OPENAI_API_KEY) {
+    console.error('❌ ERRO: OPENAI_API_KEY não encontrada no arquivo .env');
+    console.error('Por favor, crie um arquivo .env com: OPENAI_API_KEY=sua_chave_aqui');
+    process.exit(1);
+}
+
+// Porta do servidor (do .env ou padrão 8181)
+const PORT = process.env.PORT || 8181;
 
 const key = fs.readFileSync('cert.key');
 const cert = fs.readFileSync('cert.crt');
@@ -122,13 +132,6 @@ io.on('connection', (socket) => {
             return;
         }
 
-        if(!OPENAI_API_KEY){
-            const msg = 'OPENAI_API_KEY não definida no .env';
-            console.error(`[${userName}] ❌ ${msg}`);
-            callback({ success: false, error: msg });
-            return;
-        }
-
         // Criar WebSocket com OpenAI
         const openAIWs = new WebSocket(
             'wss://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview-2024-12-17',
@@ -186,6 +189,29 @@ io.on('connection', (socket) => {
             console.log(`[${userName}] Desconectado da OpenAI`);
         }
     });
+
+    // ==================== ENVIAR TRANSCRIÇÃO PARA OUTRO PEER ====================
+    
+    socket.on('sendTranscriptionToPeer', (data) => {
+        const { transcription, from, to } = data;
+        console.log(`[TRANSCRIPTION] ${from} -> ${to}: "${transcription}"`);
+        
+        // Encontrar socket do peer destino
+        const targetSocket = connectedSockets.find(s => s.userName === to);
+        
+        if(targetSocket){
+            // Enviar transcrição para o peer destino
+            io.to(targetSocket.socketId).emit('receiveTranscriptionFromPeer', {
+                transcription: transcription,
+                from: from
+            });
+            console.log(`[TRANSCRIPTION] ✅ Enviado para ${to}`);
+        } else {
+            console.log(`[TRANSCRIPTION] ❌ Peer ${to} não encontrado`);
+        }
+    });
+
+    // ===========================================================================
 
     // Cleanup ao desconectar
     socket.on('disconnect', () => {

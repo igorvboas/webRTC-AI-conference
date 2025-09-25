@@ -8,6 +8,8 @@ class TranscriptionManager {
         this.currentTranscript = '';
         this.transcriptHistory = [];
         this.audioProcessor = null;
+        this.lastSpeaker = null; // Rastrear último falante
+        this.currentSpeechText = ''; // Texto da fala atual sendo construída
     }
 
     /**
@@ -45,6 +47,14 @@ class TranscriptionManager {
             log('Desconectado da OpenAI');
             this.isConnected = false;
         });
+
+        // ========== RECEBER TRANSCRIÇÃO DE OUTRO PEER ==========
+        this.socket.on('receiveTranscriptionFromPeer', (data) => {
+            const { transcription, from } = data;
+            log('📩 Transcrição recebida de', from, ':', transcription);
+            this.displayTranscript(transcription, from, false);
+        });
+        // ========================================================
     }
 
     /**
@@ -107,23 +117,35 @@ class TranscriptionManager {
         const sessionConfig = {
             type: 'session.update',
             session: {
-                modalities: ['text'], // APENAS TEXTO - sem resposta de áudio!
-                instructions: 'Você é um assistente de transcrição. Apenas transcreva o áudio recebido em português brasileiro. Não responda, não comente, apenas transcreva exatamente o que foi dito.',
+                // ✅ APENAS TEXTO: Sem áudio de resposta do assistente
+                modalities: ['text'],
+                
+                // ✅ INSTRUÇÕES CLARAS: Apenas transcrever, nunca responder
+                instructions: 'Você é um assistente de transcrição. Apenas transcreva o áudio recebido em português brasileiro. NUNCA responda, NUNCA comente, NUNCA interaja. Apenas transcreva exatamente o que foi dito, palavra por palavra.',
+                
+                // ✅ FORMATO DE INPUT: PCM16 para áudio recebido
                 input_audio_format: CONFIG.AUDIO.FORMAT,
+                
+                // ✅ TRANSCRIÇÃO DE INPUT: Usar Whisper para transcrever áudio do usuário
                 input_audio_transcription: {
                     model: 'whisper-1'
                 },
+                
+                // ✅ DETECÇÃO DE VOZ: VAD (Voice Activity Detection) automático
                 turn_detection: {
-                    type: 'server_vad', // Detecção automática de voz
-                    threshold: 0.5,
-                    prefix_padding_ms: 300,
-                    silence_duration_ms: 500
-                }
+                    type: 'server_vad', // Server-side Voice Activity Detection
+                    threshold: 0.5,      // Sensibilidade (0.0 a 1.0)
+                    prefix_padding_ms: 300,    // Capturar 300ms antes da fala
+                    silence_duration_ms: 500   // Considerar pausa após 500ms de silêncio
+                },
+                
+                // ❌ REMOVIDO: voice, output_audio_format, temperature, max_response_output_tokens
+                // Não queremos que o assistente gere qualquer tipo de resposta
             }
         };
 
         this.send(sessionConfig);
-        log('✅ Sessão configurada para transcrição apenas');
+        log('✅ Sessão configurada para transcrição apenas (sem respostas)');
     }
 
     /**
@@ -172,6 +194,8 @@ class TranscriptionManager {
 
                 case 'input_audio_buffer.speech_stopped':
                     log('🤐 Fala pausada');
+                    // Finalizar a fala atual quando detectar pausa
+                    this.finalizeSpeech();
                     break;
 
                 case 'conversation.item.created':
@@ -180,14 +204,35 @@ class TranscriptionManager {
                     break;
 
                 case 'conversation.item.input_audio_transcription.completed':
-                    log('📝 Transcrição completa:', message.transcript);
-                    this.updateTranscript(message.transcript);
+                    log('📝 Transcrição de input completa:', message.transcript);
+                    // ✅ ÚNICO evento correto: transcrição do áudio do USUÁRIO
+                    // Este evento contém APENAS o que o usuário falou, sem respostas do assistente
+                    this.processUserTranscription(message.transcript);
+                    break;
+
+                case 'response.created':
+                    log('🤖 Resposta criada');
+                    // ⚠️ Ignorado: não queremos respostas do assistente
+                    break;
+
+                case 'response.output_item.added':
+                    log('📤 Item de output adicionado:', message.item);
+                    // ⚠️ Ignorado: outputs são respostas do assistente
+                    break;
+
+                case 'response.content_part.added':
+                    log('📝 Parte de conteúdo adicionada');
+                    // ⚠️ Ignorado: conteúdo gerado pelo assistente
                     break;
 
                 case 'response.audio_transcript.delta':
-                    log('📝 Delta de transcrição:', message.delta);
-                    this.updateTranscript(message.delta);
+                    log('📝 Delta de transcrição de áudio:', message.delta);
+                    // ⚠️ Ignorado: transcrição do áudio gerado pelo assistente
                     break;
+
+                // ❌ REMOVIDO: response.text.delta
+                // Este evento capturava RESPOSTAS DO ASSISTENTE, não transcrições do usuário
+                // Era a causa do problema 2 (texto do agente aparecendo)
 
                 case 'response.done':
                     log('✅ Resposta completa');
@@ -206,6 +251,46 @@ class TranscriptionManager {
     }
 
     /**
+     * Processa a transcrição do usuário (novo método específico)
+     */
+    processUserTranscription(transcript) {
+        if (!transcript) return;
+
+        log('🔍 DEBUG - didIOffer:', typeof didIOffer !== 'undefined' ? didIOffer : 'undefined');
+        log('🔍 DEBUG - remoteUserName:', typeof remoteUserName !== 'undefined' ? remoteUserName : 'undefined');
+        log('🔍 DEBUG - userName:', typeof userName !== 'undefined' ? userName : 'undefined');
+
+        // ========== LÓGICA DE DECISÃO: EXIBIR OU ENVIAR ==========
+        
+        // CASO 1: Sou o OFFERER (quem iniciou a chamada)
+        if (typeof didIOffer !== 'undefined' && didIOffer === true) {
+            log('✅ Sou OFFERER - exibindo localmente');
+            this.displayTranscript(
+                transcript, 
+                typeof userName !== 'undefined' ? userName : 'Você', 
+                true
+            );
+        } 
+        // CASO 2: Sou o ANSWERER (quem atendeu a chamada)
+        else if (typeof didIOffer !== 'undefined' && didIOffer === false) {
+            // ✅ CORREÇÃO PROBLEMA 1: Answerer SEMPRE envia, NUNCA exibe localmente
+            if (typeof remoteUserName !== 'undefined' && remoteUserName) {
+                log('✅ Sou ANSWERER - enviando para offerer:', remoteUserName);
+                this.sendTranscriptionToPeer(transcript, remoteUserName);
+            } else {
+                logError('❌ ANSWERER sem remoteUserName definido!');
+            }
+        } 
+        // CASO 3: FALLBACK (não deveria acontecer em produção)
+        else {
+            logWarning('⚠️ FALLBACK - variáveis não definidas corretamente');
+            logWarning('Isso indica um problema de inicialização');
+            // ❌ REMOVIDO: Não exibir mais no fallback para evitar duplicação
+            // this.displayTranscript(transcript, 'Você', true);
+        }
+    }
+
+    /**
      * Processa transcrição
      */
     handleTranscription(item) {
@@ -213,13 +298,85 @@ class TranscriptionManager {
             const content = item.content?.[0];
             if (content?.type === 'input_audio' && content.transcript) {
                 log('📝 Transcrição do usuário:', content.transcript);
-                this.updateTranscript(content.transcript);
+                
+                // Verificar se deve exibir localmente ou enviar para outro peer
+                // didIOffer e userName são variáveis globais do scripts.js
+                if (typeof didIOffer !== 'undefined' && didIOffer === true) {
+                    // Sou o OFFERER (quem ligou) - Exibir localmente
+                    this.displayTranscript(content.transcript, userName, true);
+                } else if (typeof didIOffer !== 'undefined' && didIOffer === false && remoteUserName) {
+                    // Sou o ANSWERER (quem atendeu) - Enviar para o offerer
+                    this.sendTranscriptionToPeer(content.transcript, remoteUserName);
+                } else {
+                    // Fallback: exibir localmente
+                    this.displayTranscript(content.transcript, userName, true);
+                }
             }
         }
     }
 
     /**
-     * Atualiza a transcrição na UI
+     * Envia transcrição para outro peer
+     */
+    sendTranscriptionToPeer(transcription, targetUserName) {
+        log('📤 Enviando transcrição para', targetUserName);
+        
+        this.socket.emit('sendTranscriptionToPeer', {
+            transcription: transcription,
+            from: userName, // variável global
+            to: targetUserName
+        });
+    }
+
+    /**
+     * Exibe transcrição na UI de forma incremental
+     */
+    displayTranscript(text, speaker, isLocal) {
+        if (!text) return;
+
+        const label = isLocal ? 'Você' : speaker;
+        
+        // Se é o mesmo falante, atualizar a linha atual
+        if (this.lastSpeaker === label) {
+            this.currentSpeechText += ' ' + text;
+        } else {
+            // Falante diferente - finalizar fala anterior e começar nova
+            if (this.lastSpeaker) {
+                // Adicionar quebra de linha da fala anterior
+                this.currentTranscript += '\n';
+            }
+            
+            // Começar nova fala
+            this.lastSpeaker = label;
+            this.currentSpeechText = text;
+            this.currentTranscript += `[${label}]: `;
+        }
+        
+        // Atualizar textarea com transcrição completa + fala atual
+        const transcriptInput = document.getElementById(CONFIG.UI.TRANSCRIPTION_INPUT_ID);
+        if (transcriptInput) {
+            transcriptInput.value = this.currentTranscript + this.currentSpeechText;
+            // Auto-scroll para o final
+            transcriptInput.scrollTop = transcriptInput.scrollHeight;
+        }
+
+        log('📄 Transcrição incremental:', `[${label}]: ${this.currentSpeechText}`);
+    }
+
+    /**
+     * Finaliza a fala atual (chamado quando detecta pausa)
+     */
+    finalizeSpeech() {
+        if (this.currentSpeechText) {
+            // Consolidar a fala completa no histórico
+            this.currentTranscript += this.currentSpeechText;
+            this.currentSpeechText = '';
+            log('✅ Fala finalizada');
+        }
+    }
+
+    /**
+     * Atualiza a transcrição na UI (mantido para compatibilidade)
      */
     updateTranscript(text) {
         if (!text) return;
@@ -299,6 +456,9 @@ class TranscriptionManager {
     stop() {
         log('⏸️ Parando transcrição...');
         this.isTranscribing = false;
+        
+        // Finalizar fala atual antes de parar
+        this.finalizeSpeech();
         
         // Parar processamento de áudio
         if (this.audioProcessor) {

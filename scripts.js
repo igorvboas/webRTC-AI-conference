@@ -2,17 +2,14 @@ const userName = "Igor - "+Math.floor(Math.random() * 100000)
 const password = "x";
 document.querySelector('#user-name').innerHTML = userName;
 const socket = io.connect('https://192.168.1.71:8181/',{
-//const socket = io.connect('https://localhost:8181/',{
     auth: {
         userName,password
     }
 })
 
-// ========== INICIALIZAR TRANSCRIPTION MANAGER E AUDIO PROCESSOR ==========
-const audioProcessor = new AudioProcessor();
+// ========== INICIALIZAR TRANSCRIPTION MANAGER ==========
 transcriptionManager.setSocket(socket);
-transcriptionManager.setAudioProcessor(audioProcessor);
-// ==========================================================================
+// =======================================================
 
 const localVideoEl = document.querySelector('#local-video');
 const remoteVideoEl = document.querySelector('#remote-video');
@@ -21,6 +18,8 @@ let localStream; //a var to hold the local video stream
 let remoteStream; //a var to hold the remote video stream
 let peerConnection; //the peerConnection that the two clients use to talk
 let didIOffer = false;
+let audioProcessor = null; // Declarar aqui, inicializar depois
+let remoteUserName = null; // Armazenar nome do peer remoto
 
 let peerConfiguration = {
     iceServers:[
@@ -61,6 +60,12 @@ const answerOffer = async(offerObj)=>{
     await peerConnection.setLocalDescription(answer); //this is CLIENT2, and CLIENT2 uses the answer as the localDesc
     console.log(offerObj)
     console.log(answer)
+    
+    // ========== ARMAZENAR NOME DO PEER REMOTO (OFFERER) ==========
+    remoteUserName = offerObj.offererUserName;
+    log('👤 Peer remoto identificado:', remoteUserName);
+    // ==============================================================
+    
     // console.log(peerConnection.signalingState) //should be have-local-pranswer because CLIENT2 has set its local desc to it's answer (but it won't be)
     //add the answer to the offerObj so the server knows which offer this is related to
     offerObj.answer = answer 
@@ -93,6 +98,13 @@ const fetchUserMedia = ()=>{
             localStream = stream;
             
             // ========== INICIALIZAR AUDIO PROCESSOR COM O STREAM ==========
+            // Só inicializar se ainda não foi criado
+            if (!audioProcessor) {
+                log('Criando AudioProcessor...');
+                audioProcessor = new AudioProcessor();
+                transcriptionManager.setAudioProcessor(audioProcessor);
+            }
+            
             log('Inicializando captura de áudio para transcrição...');
             await audioProcessor.init(stream);
             // ===============================================================
