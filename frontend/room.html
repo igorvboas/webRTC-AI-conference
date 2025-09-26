@@ -10,8 +10,8 @@
     <style>
         /* Estilos específicos da sala */
         .room-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: linear-gradient(135deg, #A6CE39 0%, #95B832 100%);
+            color: #0A0A0A;
             padding: 15px;
             margin-bottom: 20px;
             border-radius: 10px;
@@ -24,30 +24,33 @@
         .room-name {
             font-size: 20px;
             font-weight: 700;
+            color: #FFFFFF;
         }
         .room-role {
-            background: rgba(255,255,255,0.2);
+            background: rgba(166,206,57,0.2);
             padding: 5px 15px;
             border-radius: 20px;
             font-size: 14px;
+            color: #A6CE39;
         }
         .participant-name {
             display: none;
-            background: rgba(255,255,255,0.2);
+            background: rgba(166,206,57,0.2);
             padding: 5px 15px;
             border-radius: 20px;
             font-size: 14px;
             margin-top: 10px;
+            color: #A6CE39;
         }
         .participant-name.show {
             display: block;
         }
         .btn-end-room {
-            background: #dc3545;
+            background: #EF4444;
             border: none;
             border-radius: 8px;
             padding: 8px 20px;
-            color: white;
+            color: #FFFFFF;
             font-weight: 600;
             font-size: 14px;
         }
@@ -67,12 +70,14 @@
             display: none;
         }
         .participant-form-content {
-            background: white;
+            background: #1A1A1A;
             padding: 40px;
             border-radius: 20px;
             max-width: 400px;
             width: 100%;
+            color: #FFFFFF;
         }
+
     </style>
 </head>
 <body>
@@ -121,8 +126,29 @@
         <div class="row mb-3 justify-content-md-center">
             <div id="user-name"></div>
             <button id="call" class="btn btn-primary col-1">Call!</button>
-            <button id="hangup" class="col-1 btn btn-primary">Hangup</button>
             <div id="answer" class="col"></div>
+        </div>
+
+        <!-- Controles de Dispositivos -->
+        <div class="row mb-3">
+            <div class="col-md-4">
+                <label for="audio-input" class="form-label">🎤 Microfone</label>
+                <select id="audio-input" class="form-select form-select-sm">
+                    <option value="">Padrão</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label for="video-input" class="form-label">📹 Câmera</label>
+                <select id="video-input" class="form-select form-select-sm">
+                    <option value="">Padrão</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label for="audio-output" class="form-label">🔊 Saída de Áudio</label>
+                <select id="audio-output" class="form-select form-select-sm">
+                    <option value="">Padrão</option>
+                </select>
+            </div>
         </div>
 
         <!-- Vídeos -->
@@ -171,6 +197,6 @@
     <script src='audioProcessor.js'></script>
     <script src='transcription.js'></script>
     <script src='room.js'></script>
-    <!-- ❌ REMOVIDO: socketListeners.js (sistema antigo sem rooms) -->
+    <script src='inputOutput.js'></script>
 </body>
 </html>

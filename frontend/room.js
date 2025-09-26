@@ -351,6 +351,12 @@ const fetchUserMedia = () => {
                 transcriptionManager.setAudioProcessor(audioProcessor);
             }
             
+            // ✅ Carregar dispositivos após ter permissão
+            if(typeof getDevices === 'function') {
+                getDevices();
+            }
+
+
             await audioProcessor.init(stream);
             resolve();
         } catch(err) {
@@ -359,6 +365,7 @@ const fetchUserMedia = () => {
         }
     });
 }
+
 
 const createPeerConnection = (offerObj) => {
     return new Promise(async(resolve, reject) => {

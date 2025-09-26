@@ -7,76 +7,122 @@
     <meta name='viewport' content='width=device-width, initial-scale=1'>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        /* Estilos específicos da sala */
-        .room-header {
-            background: linear-gradient(135deg, #A6CE39 0%, #95B832 100%);
-            color: #0A0A0A;
-            padding: 15px;
-            margin-bottom: 20px;
-            border-radius: 10px;
-        }
-        .room-info {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .room-name {
-            font-size: 20px;
-            font-weight: 700;
-            color: #FFFFFF;
-        }
-        .room-role {
-            background: rgba(166,206,57,0.2);
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 14px;
-            color: #A6CE39;
-        }
-        .participant-name {
-            display: none;
-            background: rgba(166,206,57,0.2);
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 14px;
-            margin-top: 10px;
-            color: #A6CE39;
-        }
-        .participant-name.show {
-            display: block;
-        }
-        .btn-end-room {
-            background: #EF4444;
-            border: none;
-            border-radius: 8px;
-            padding: 8px 20px;
-            color: #FFFFFF;
-            font-weight: 600;
-            font-size: 14px;
-        }
-        .participant-form {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.8);
+        body {
+            background: linear-gradient(135deg, #0A0A0A 0%, #1A1A1A 100%);
+            min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            z-index: 9999;
-        }
-        .participant-form.hide {
-            display: none;
-        }
-        .participant-form-content {
-            background: #1A1A1A;
-            padding: 40px;
-            border-radius: 20px;
-            max-width: 400px;
-            width: 100%;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
             color: #FFFFFF;
         }
-
+        .create-room-container {
+            background: #1A1A1A;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+            max-width: 500px;
+            width: 100%;
+        }
+        .create-room-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .create-room-header h1 {
+            color: #A6CE39;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        .create-room-header p {
+            color: #CCCCCC;
+        }
+        .form-label {
+            font-weight: 600;
+            color: #FFFFFF;
+            margin-bottom: 8px;
+        }
+        .form-control {
+            border-radius: 10px;
+            padding: 12px;
+            border: 2px solid #333333;
+            background: #1A1A1A;
+            color: #FFFFFF;
+            transition: border-color 0.3s;
+        }
+        .form-control:focus {
+            border-color: #A6CE39;
+            box-shadow: 0 0 0 0.2rem rgba(166, 206, 57, 0.25);
+        }
+        .btn-create {
+            background: linear-gradient(135deg, #A6CE39 0%, #95B832 100%);
+            border: none;
+            border-radius: 10px;
+            padding: 14px;
+            font-weight: 600;
+            font-size: 16px;
+            width: 100%;
+            margin-top: 20px;
+            transition: transform 0.2s;
+            color: #0A0A0A;
+        }
+        .btn-create:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(166, 206, 57, 0.3);
+        }
+        .link-container {
+            display: none;
+            margin-top: 30px;
+            padding: 20px;
+            background: #2A2A2A;
+            border-radius: 10px;
+        }
+        .link-container.show {
+            display: block;
+        }
+        .room-link {
+            background: #1A1A1A;
+            border: 2px solid #A6CE39;
+            border-radius: 8px;
+            padding: 12px;
+            word-break: break-all;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            color: #A6CE39;
+            margin: 15px 0;
+        }
+        .btn-copy {
+            background: #28a745;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 20px;
+            color: white;
+            font-weight: 600;
+            width: 100%;
+            margin-top: 10px;
+        }
+        .btn-enter {
+            background: #A6CE39;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 20px;
+            color: #0A0A0A;
+            font-weight: 600;
+            width: 100%;
+            margin-top: 10px;
+        }
+        .icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+            color: #A6CE39;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            color: #A6CE39;
+        }
+        .loading.show {
+            display: block;
+        }
     </style>
 </head>
 <body>
