@@ -1,7 +1,11 @@
+// ========== NÃO ESTÁ SENDO USADO NO PROJETO MAS VAI SER UTILIZADO COMO REFERENCIA ==========
+
+
 const userName = "Igor - "+Math.floor(Math.random() * 100000)
 const password = "x";
 document.querySelector('#user-name').innerHTML = userName;
-const socket = io.connect('https://192.168.1.71:8181/',{
+const socket = io.connect(CONFIG.BACKEND_URL || 'https://localhost:8181/', {
+//const socket = io.connect('https://localhost:8181/',{
     auth: {
         userName,password
     }

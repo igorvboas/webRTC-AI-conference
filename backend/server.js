@@ -9,7 +9,8 @@ const socketio = require('socket.io');
 const WebSocket = require('ws');
 const crypto = require('crypto'); // Para gerar roomId único
 
-app.use(express.static(__dirname));
+// removi depois da separação de backend e frontend
+// app.use(express.static(__dirname));
 
 // Chave da API OpenAI (do .env)
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
@@ -20,6 +21,7 @@ if (!OPENAI_API_KEY) {
 }
 
 const PORT = process.env.PORT || 8181;
+const FRONTEND_PORT = process.env.FRONTEND_PORT || 3000;
 
 const key = fs.readFileSync('cert.key');
 const cert = fs.readFileSync('cert.crt');
@@ -29,16 +31,17 @@ const expressServer = https.createServer({key, cert}, app);
 const io = socketio(expressServer, {
     cors: {
         origin: "*",
+        //origin: process.env.FRONTEND_URL || `https://localhost:${FRONTEND_PORT}`, // URL do Vercel
         methods: ["GET", "POST"],
         credentials: true
     }
 });
 
-expressServer.listen(PORT);
+expressServer.listen(PORT, '0.0.0.0');
 
 console.log(`🚀 Servidor rodando em https://localhost:${PORT}`);
 console.log('📡 Sistema de Rooms ativo');
-console.log(`🔑 API Key configurada: ${OPENAI_API_KEY.substring(0, 20)}...`);
+console.log(`🔑 API Key configurada: ${OPENAI_API_KEY.substring(0, 11)}...`);
 
 // ==================== ESTRUTURAS DE DADOS ====================
 
@@ -108,7 +111,7 @@ function startRoomExpiration(roomId) {
 
     roomTimers.set(roomId, timer);
 
-    console.log(`⏱️ Timer de expiração iniciado para sala: ${roomId} (5 min)`);
+    // console.log(`⏱️ Timer de expiração iniciado para sala: ${roomId} (5 min)`);
 }
 
 /**
@@ -201,11 +204,13 @@ io.on('connection', (socket) => {
         startRoomExpiration(roomId);
 
         console.log(`✅ Sala criada: ${roomId} por ${hostName}`);
+        console.log("FRONTEND_URL: ", process.env.FRONTEND_URL)
+        const FRONTEND_URL = process.env.FRONTEND_URL || `https://localhost:${process.env.FRONTEND_PORT || 3000}`;
 
         callback({ 
             success: true, 
             roomId: roomId,
-            roomUrl: `https://192.168.1.71:${PORT}/room.html?roomId=${roomId}`
+            roomUrl: `${FRONTEND_URL}/room.html?roomId=${roomId}`
         });
     });
 

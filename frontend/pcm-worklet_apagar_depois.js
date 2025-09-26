@@ -1,3 +1,4 @@
+// ========== NÃO ESTÁ SENDO USADO NO PROJETO MAS VAI SER UTILIZADO COMO REFERENCIA ==========
 // 20ms @48k em Float32 → posta p/ main thread
 class PCMWorklet extends AudioWorkletProcessor {
     constructor(opts){

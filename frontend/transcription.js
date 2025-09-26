@@ -10,6 +10,7 @@ class TranscriptionManager {
         this.audioProcessor = null;
         this.lastSpeaker = null; // Rastrear último falante
         this.currentSpeechText = ''; // Texto da fala atual sendo construída
+        this.currentTranscripthold = ''; // Texto da fala atual sendo construída
     }
 
     /**
@@ -256,9 +257,6 @@ class TranscriptionManager {
     processUserTranscription(transcript) {
         if (!transcript) return;
 
-        log('🔍 DEBUG - didIOffer:', typeof didIOffer !== 'undefined' ? didIOffer : 'undefined');
-        log('🔍 DEBUG - remoteUserName:', typeof remoteUserName !== 'undefined' ? remoteUserName : 'undefined');
-        log('🔍 DEBUG - userName:', typeof userName !== 'undefined' ? userName : 'undefined');
 
         // ========== LÓGICA DE DECISÃO: EXIBIR OU ENVIAR ==========
         
@@ -341,35 +339,30 @@ class TranscriptionManager {
      * Exibe transcrição na UI de forma incremental
      */
     displayTranscript(text, speaker, isLocal) {
-        if (!text) return;
-
         const label = isLocal ? 'Você' : speaker;
         
-        // Se é o mesmo falante, atualizar a linha atual
         if (this.lastSpeaker === label) {
+            // Mesmo falante - adiciona ao texto atual
             this.currentSpeechText += ' ' + text;
         } else {
-            // Falante diferente - finalizar fala anterior e começar nova
-            if (this.lastSpeaker) {
-                // Adicionar quebra de linha da fala anterior
-                this.currentTranscript += '\n';
+            // Falante diferente
+            // Consolidar fala anterior
+            if (this.lastSpeaker && this.currentSpeechText) {
+                this.currentTranscript += this.currentSpeechText + '\n'; // ✅ Quebra APÓS texto anterior
             }
             
             // Começar nova fala
             this.lastSpeaker = label;
             this.currentSpeechText = text;
-            this.currentTranscript += `[${label}]: `;
+            this.currentTranscript += `[${label}]: `; // Novo label na linha seguinte
         }
         
-        // Atualizar textarea com transcrição completa + fala atual
+        // Atualizar textarea
         const transcriptInput = document.getElementById(CONFIG.UI.TRANSCRIPTION_INPUT_ID);
         if (transcriptInput) {
             transcriptInput.value = this.currentTranscript + this.currentSpeechText;
-            // Auto-scroll para o final
             transcriptInput.scrollTop = transcriptInput.scrollHeight;
         }
-
-        log('📄 Transcrição incremental:', `[${label}]: ${this.currentSpeechText}`);
     }
 
     /**

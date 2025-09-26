@@ -1,4 +1,6 @@
 
+// ========== NÃO ESTÁ SENDO USADO NO PROJETO MAS VAI SER UTILIZADO COMO REFERENCIA ==========
+
 //on connection get all available offers and call createOfferEls
 socket.on('availableOffers',offers=>{
     console.log(offers)

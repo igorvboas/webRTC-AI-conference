@@ -1,12 +1,3 @@
-# Dependencies
-node_modules/
-package-lock.json
-
-# Certificate
-ca.crt
-ca.key
-cert.crt
-cert.key
-
-# Environment variables
-.env
+# Etapas
+ETPAS.md
+taskList.md

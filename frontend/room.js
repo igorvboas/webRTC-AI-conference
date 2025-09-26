@@ -80,42 +80,51 @@ async function joinRoomAsHost() {
     logRoom('Entrando como HOST:', currentUserName);
 
     // Conectar Socket.IO
-    socket = io.connect('https://192.168.1.71:8181/', {
+    socket = io.connect(CONFIG.BACKEND_URL || 'https://localhost:8181/', {
+        //socket = io.connect('https://localhost:8181/', {
         auth: {
             userName: currentUserName,
             password: "x"
         }
     });
 
-    // Configurar listeners do socket
-    setupSocketListeners();
+    socket.on('connect', () => {
+        console.log('Conexão estabelecida com o servidor');
+        // Configurar listeners do socket
+        setupSocketListeners();
 
-    // Entrar na sala
-    socket.emit('joinRoom', {
-        roomId: currentRoomId,
-        participantName: currentUserName
-    }, (response) => {
-        if (response.success) {
-            currentUserRole = response.role;
-            roomData = response.roomData;
-            
-            // ✅ VALIDAÇÃO: Verificar se backend confirma que é host
-            if (currentUserRole !== 'host') {
-                alert('⚠️ Erro de autenticação: Você não é o host desta sala');
+        // Entrar na sala
+        socket.emit('joinRoom', {
+            roomId: currentRoomId,
+            participantName: currentUserName
+        }, (response) => {
+            if (response.success) {
+                currentUserRole = response.role;
+                roomData = response.roomData;
+                
+                // ✅ VALIDAÇÃO: Verificar se backend confirma que é host
+                if (currentUserRole !== 'host') {
+                    alert('⚠️ Erro de autenticação: Você não é o host desta sala');
+                    window.location.href = '/create-room.html';
+                    return;
+                }
+                
+                logRoom('✅ Entrou na sala como HOST (validado)');
+                updateRoomUI();
+                
+                // Inicializar transcrição manager
+                initializeTranscription();
+            } else {
+                alert('Erro ao entrar na sala: ' + response.error);
                 window.location.href = '/create-room.html';
-                return;
             }
-            
-            logRoom('✅ Entrou na sala como HOST (validado)');
-            updateRoomUI();
-            
-            // Inicializar transcrição manager
-            initializeTranscription();
-        } else {
-            alert('Erro ao entrar na sala: ' + response.error);
-            window.location.href = '/create-room.html';
-        }
+        });
+
     });
+
+    
+
+    
 }
 
 /**
@@ -126,49 +135,58 @@ function joinRoomAsParticipant(participantName) {
     logRoom('Entrando como PARTICIPANTE:', currentUserName);
 
     // Conectar Socket.IO
-    socket = io.connect('https://192.168.1.71:8181/', {
+    socket = io.connect(CONFIG.BACKEND_URL || 'https://localhost:8181/', {
+        //socket = io.connect('https://localhost:8181/', {
         auth: {
             userName: currentUserName,
             password: "x"
         }
     });
 
-    // Configurar listeners do socket
-    setupSocketListeners();
 
-    // Entrar na sala
-    socket.emit('joinRoom', {
-        roomId: currentRoomId,
-        participantName: participantName
-    }, (response) => {
-        if (response.success) {
-            currentUserRole = response.role;
-            roomData = response.roomData;
-            
-            // ✅ VALIDAÇÃO: Verificar se backend confirma que é participante
-            if (currentUserRole === 'host') {
-                // Se backend diz que é host, mas URL não tinha role=host, algo errado
-                logWarning('⚠️ Backend identificou como host, mas URL não tinha role=host');
-            }
-            
-            logRoom('✅ Entrou na sala como', currentUserRole);
-            
-            // Esconder modal
-            document.getElementById('participant-form').classList.add('hide');
-            
-            updateRoomUI();
-            
-            // ✅ AJUSTE 2: Ativar transcrição automaticamente para participante
-            initializeTranscription().then(() => {
-                if (currentUserRole === 'participant') {
-                    autoActivateTranscriptionForParticipant();
+    socket.on('connect', () => {
+        console.log('Conexão estabelecida com o servidor');
+        // Configurar listeners do socket
+        setupSocketListeners();
+
+        // Entrar na sala
+        socket.emit('joinRoom', {
+            roomId: currentRoomId,
+            participantName: participantName
+        }, (response) => {
+            if (response.success) {
+                currentUserRole = response.role;
+                roomData = response.roomData;
+                
+                // ✅ VALIDAÇÃO: Verificar se backend confirma que é participante
+                if (currentUserRole === 'host') {
+                    // Se backend diz que é host, mas URL não tinha role=host, algo errado
+                    logWarning('⚠️ Backend identificou como host, mas URL não tinha role=host');
                 }
-            });
-        } else {
-            document.getElementById('error-message').textContent = response.error;
-            document.getElementById('error-message').style.display = 'block';
-        }
+                
+                logRoom('✅ Entrou na sala como', currentUserRole);
+                
+                // Esconder modal
+                document.getElementById('participant-form').classList.add('hide');
+                
+                updateRoomUI();
+                
+                // ✅ AJUSTE 2: Ativar transcrição automaticamente para participante
+                initializeTranscription().then(() => {
+                    if (currentUserRole === 'participant') {
+                        autoActivateTranscriptionForParticipant();
+                    }
+                });
+            } else {
+                document.getElementById('error-message').textContent = response.error;
+                document.getElementById('error-message').style.display = 'block';
+            }
+        });        
+        
     });
+
+
+    
 }
 
 // ==================== UI DA SALA ====================

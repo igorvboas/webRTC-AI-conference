@@ -1,0 +1,15 @@
+# Dependências
+node_modules/
+
+# Build (Vercel gera isso)
+.vercel/
+dist/
+.next/
+out/
+
+# Cache
+.cache/
+.parcel-cache/
+
+# Logs
+*.log

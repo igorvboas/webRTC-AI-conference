@@ -7,6 +7,18 @@ const CONFIG = {
         MODEL: 'gpt-4o-realtime-preview-2024-12-17'
     },
     
+    // ------------------------ AAAAAAAAAAATENÇÃAAAAAAAAAAAAAAAOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO ------------------------
+    // ------------------------ AAAAAAAAAAATENÇÃAAAAAAAAAAAAAAAOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO ------------------------
+    // ------------------------ AAAAAAAAAAATENÇÃAAAAAAAAAAAAAAAOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO ------------------------
+    // ------------------------ AAAAAAAAAAATENÇÃAAAAAAAAAAAAAAAOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO ------------------------
+    
+    // Backend URL (local ou Vercel) 
+    BACKEND_URL: 'https://localhost:8181', // ← TROCAR PARA https://seu-backend.gcp.app'
+
+    // ------------------------ AAAAAAAAAAATENÇÃAAAAAAAAAAAAAAAOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO ------------------------
+    // ------------------------ AAAAAAAAAAATENÇÃAAAAAAAAAAAAAAAOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO ------------------------
+    // ------------------------ AAAAAAAAAAATENÇÃAAAAAAAAAAAAAAAOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO ------------------------
+    // ------------------------ AAAAAAAAAAATENÇÃAAAAAAAAAAAAAAAOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO ------------------------
     // Configurações de Áudio
     AUDIO: {
         SAMPLE_RATE: 24000,        // OpenAI espera 24kHz
