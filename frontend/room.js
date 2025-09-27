@@ -232,9 +232,11 @@ function updateRoomUI() {
     // Transcrição e controles baseados no papel
     if (currentUserRole === 'host') {
         // HOST: Vê transcrição, botão finalizar e botão Call
-        document.getElementById('transcription-card').style.display = 'block';
         document.getElementById('end-room-btn').style.display = 'inline-block';
         document.querySelector('#call').style.display = 'inline-block'; // Mostrar Call
+        document.getElementById('transcription-card').style.display = 'flex'; // ✅ flex ao invés de block
+        document.getElementById('suggestions-card').style.display = 'flex';   // ✅ flex ao invés de block
+        document.getElementById('toggle-transcription').style.display = 'flex';
         
         // Mostrar participante se já entrou
         if (roomData.participantUserName) {
@@ -539,3 +541,5 @@ document.getElementById('end-room-btn')?.addEventListener('click', () => {
 // ==================== BOTÕES WEBRTC ====================
 
 document.querySelector('#call').addEventListener('click', call);
+document.querySelector('#toggle-camera-btn').addEventListener('click', toggleCamera);
+document.querySelector('#toggle-mic-btn').addEventListener('click', toggleMicrophone);

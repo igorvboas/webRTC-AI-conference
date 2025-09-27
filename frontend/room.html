@@ -8,80 +8,258 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel='stylesheet' type='text/css' media='screen' href='styles.css'>
     <style>
-        /* Estilos específicos da sala */
-        .room-header {
-            background: linear-gradient(135deg, #A6CE39 0%, #95B832 100%);
-            color: #0A0A0A;
-            padding: 15px;
-            margin-bottom: 20px;
-            border-radius: 10px;
+        body {
+            background: #0a0a0a;
+            color: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            height: 100vh;
         }
-        .room-info {
+
+        .container-fluid {
+            height: 100vh;
             display: flex;
-            justify-content: space-between;
-            align-items: center;
+            flex-direction: column;
+            padding: 12px;
         }
-        .room-name {
-            font-size: 20px;
-            font-weight: 700;
-            color: #FFFFFF;
+
+        .room-header {
+            padding: 10px 0;
+            margin-bottom: 0;
         }
-        .room-role {
-            background: rgba(166,206,57,0.2);
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 14px;
-            color: #A6CE39;
+
+        .room-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+            flex-shrink: 0;
         }
-        .participant-name {
-            display: none;
-            background: rgba(166,206,57,0.2);
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 14px;
-            margin-top: 10px;
-            color: #A6CE39;
-        }
-        .participant-name.show {
-            display: block;
-        }
-        .btn-end-room {
-            background: #EF4444;
+
+        .btn-call {
+            background: #6b5b95;
             border: none;
             border-radius: 8px;
             padding: 8px 20px;
-            color: #FFFFFF;
+            color: #fff;
             font-weight: 600;
             font-size: 14px;
         }
+
+        .btn-call:hover {
+            background: #574a7a;
+        }
+
+        .btn-transcription {
+            background: #d4a574;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 20px;
+            color: #0a0a0a;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .btn-answer {
+            background: #4caf50;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 20px;
+            color: #fff;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .device-controls {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 12px;
+            flex-shrink: 0;
+        }
+
+        .device-controls select {
+            background: #1a1a1a;
+            color: #fff;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 6px 10px;
+            font-size: 12px;
+            flex: 1;
+        }
+
+        .video-layout {
+            display: flex;
+            gap: 16px;
+            flex: 1;
+            min-height: 0;
+        }
+
+        .video-main-container {
+            flex: 1;
+            background: #1a1a1a;
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+            min-width: 0;
+        }
+
+        .video-local-overlay {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 280px;
+            height: 180px;
+            background: #1a1a1a;
+            border-radius: 12px;
+            overflow: hidden;
+            z-index: 10;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+
+        .video-sidebar {
+            width: 320px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            min-height: 0;
+        }
+
+        .suggestions-box,
+        .transcription-box {
+            background: #1a1a1a;
+            border-radius: 12px;
+            padding: 16px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            overflow: hidden;
+        }
+
+        .suggestions-box h6,
+        .transcription-box h6 {
+            color: #d4a574;
+            margin-bottom: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .transcription-box textarea {
+            flex: 1;
+            min-height: 0;
+            resize: none;
+        }
+
+        .video-player {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .video-label {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            background: rgba(0,0,0,0.6);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            color: #d4a574;
+            z-index: 5;
+        }
+
+        .media-controls {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 12px;
+            z-index: 10;
+        }
+
+        .media-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255,255,255,0.2);
+            color: #fff;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .media-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .media-btn.active {
+            background: #fff;
+        }
+
+        .media-btn.end-call {
+            background: #e74c3c;
+        }
+
+        .media-btn.end-call:hover {
+            background: #c0392b;
+        }
+
         .participant-form {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.8);
+            background: rgba(0,0,0,0.9);
             display: flex;
             align-items: center;
             justify-content: center;
             z-index: 9999;
         }
+
         .participant-form.hide {
             display: none;
         }
+
         .participant-form-content {
-            background: #1A1A1A;
+            background: #1a1a1a;
             padding: 40px;
             border-radius: 20px;
             max-width: 400px;
             width: 100%;
-            color: #FFFFFF;
         }
 
+        #waiting {
+            display: none;
+        }
+
+        /* Responsivo */
+        @media (max-width: 1024px) {
+            .video-layout {
+                flex-direction: column;
+            }
+            
+            .video-sidebar {
+                width: 100%;
+                flex-direction: row;
+            }
+            
+            .video-local-overlay {
+                width: 200px;
+                height: 130px;
+            }
+        }
     </style>
 </head>
 <body>
-    <!-- Modal para participante entrar com nome -->
+    <!-- Modal para participante -->
     <div id="participant-form" class="participant-form">
         <div class="participant-form-content">
             <h3 class="text-center mb-3">Entrar na Sala</h3>
@@ -103,94 +281,108 @@
         </div>
     </div>
 
-    <div class="container">
-        <!-- Header da Sala -->
-        <div class="room-header">
-            <div class="room-info">
-                <div>
-                    <div class="room-name" id="room-name">Carregando...</div>
-                    <div class="participant-name" id="participant-display">
-                        Participante: <span id="participant-name-text">Aguardando...</span>
+    <div class="container-fluid">
+        <!-- Header (oculto, mas mantido para funcionalidade) -->
+        <div class="room-header" style="display: none;">
+            <div id="room-name"></div>
+            <div id="user-role"></div>
+            <div id="user-name"></div>
+            <div id="participant-display">
+                <span id="participant-name-text"></span>
+            </div>
+        </div>
+
+        <!-- Controles principais -->
+        <div class="room-controls">
+            <button id="call" class="btn-call">Call</button>
+            <button id="toggle-transcription" class="btn-transcription" style="display: none;">
+                Ativar Transcrição
+            </button>
+            <div id="answer"></div>
+            <button class="btn btn-danger ms-auto" id="end-room-btn" style="display: none;">
+                Finalizar Sala
+            </button>
+        </div>
+
+        <!-- Controles de dispositivos -->
+        <div class="device-controls">
+            <select id="audio-input" class="form-select">
+                <option value="">🎤 Microfone</option>
+            </select>
+            <select id="video-input" class="form-select">
+                <option value="">📹 Câmera</option>
+            </select>
+            <select id="audio-output" class="form-select">
+                <option value="">🔊 Saída de Áudio</option>
+            </select>
+        </div>
+
+        <!-- Layout de vídeos -->
+        <div class="video-layout">
+            <!-- Container principal com vídeo remoto e local sobreposto -->
+            <div class="video-main-container">
+                <span class="video-label">other video</span>
+                <video class="video-player" id="remote-video" autoplay playsinline></video>
+                
+                <!-- Vídeo local sobreposto -->
+                <div class="video-local-overlay">
+                    <span class="video-label">local video</span>
+                    <video class="video-player" id="local-video" autoplay playsinline muted></video>
+                </div>
+                
+                <!-- Controles de mídia -->
+                <div class="media-controls">
+                    <button class="media-btn active" id="toggle-camera-btn" title="Câmera">
+                        📹
+                    </button>
+                    <button class="media-btn active" id="toggle-mic-btn" title="Microfone">
+                        🎤
+                    </button>
+                    <button class="media-btn end-call" id="end-call-btn" title="Desligar">
+                        📞
+                    </button>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="video-sidebar">
+                <!-- Sugestões (apenas host) -->
+                <div class="suggestions-box" id="suggestions-card" style="display: none;">
+                    <h6>Sugestões</h6>
+                    <div id="suggestions-content" style="overflow-y: auto; flex: 1;">
+                        <!-- Sugestões aparecerão aqui -->
                     </div>
                 </div>
-                <div>
-                    <span class="room-role" id="user-role">...</span>
-                    <button class="btn-end-room" id="end-room-btn" style="display: none;">
-                        Finalizar Sala
-                    </button>
-                </div>
-            </div>
-        </div>
 
-        <!-- Controles WebRTC -->
-        <div class="row mb-3 justify-content-md-center">
-            <div id="user-name"></div>
-            <button id="call" class="btn btn-primary col-1">Call!</button>
-            <div id="answer" class="col"></div>
-        </div>
-
-        <!-- Controles de Dispositivos -->
-        <div class="row mb-3">
-            <div class="col-md-4">
-                <label for="audio-input" class="form-label">🎤 Microfone</label>
-                <select id="audio-input" class="form-select form-select-sm">
-                    <option value="">Padrão</option>
-                </select>
-            </div>
-            <div class="col-md-4">
-                <label for="video-input" class="form-label">📹 Câmera</label>
-                <select id="video-input" class="form-select form-select-sm">
-                    <option value="">Padrão</option>
-                </select>
-            </div>
-            <div class="col-md-4">
-                <label for="audio-output" class="form-label">🔊 Saída de Áudio</label>
-                <select id="audio-output" class="form-select form-select-sm">
-                    <option value="">Padrão</option>
-                </select>
-            </div>
-        </div>
-
-        <!-- Vídeos -->
-        <div id="videos">
-            <div id="video-wrapper">
-                <div id="waiting" class="btn btn-warning">Waiting for answer...</div>
-                <video class="video-player" id="local-video" autoplay playsinline controls></video>
-            </div>
-            <video class="video-player" id="remote-video" autoplay playsinline controls></video>
-        </div>
-
-        <!-- Transcrição (apenas para host) -->
-        <div class="mt-4 card" id="transcription-card" style="display: none;">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">🎤 Transcrição em Tempo Real</h5>
-                <div>
-                    <span id="transcription-status" class="badge bg-secondary">Desconectado</span>
-                    <button id="toggle-transcription" class="btn btn-sm btn-success ms-2">
-                        Ativar Transcrição
-                    </button>
-                </div>
-            </div>
-            <div class="card-body">
-                <div class="mb-3">
-                    <label for="text-input-transcription" class="form-label">Texto Transcrito:</label>
+                <!-- Transcrição (apenas host) -->
+                <div class="transcription-box" id="transcription-card" style="display: none;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <h6 style="margin: 0;">
+                            Transcrição
+                            <span id="transcription-status" class="badge bg-secondary ms-2" style="font-size: 10px;">Desconectado</span>
+                        </h6>
+                    </div>
                     <textarea 
                         id="text-input-transcription" 
                         class="form-control" 
-                        rows="5" 
                         placeholder="A transcrição aparecerá aqui..." 
-                        readonly>
+                        readonly
+                        style="background: #0a0a0a; border: 1px solid #333; color: #fff; font-size: 12px;">
                     </textarea>
-                </div>
-                <div class="text-muted small">
-                    <strong>Status:</strong> <span id="transcription-info">Aguardando conexão...</span>
+                    <div class="text-muted small mt-2" style="font-size: 11px;">
+                        <span id="transcription-info">Aguardando conexão...</span>
+                    </div>
                 </div>
             </div>
         </div>
+
+        <!-- Elementos ocultos (mantidos para funcionalidade) -->
+        <div id="waiting" style="display: none;"></div>
+        <div id="video-wrapper" style="display: none;"></div>
+        <div id="videos" style="display: none;"></div>
     </div>
 
     <!-- Scripts -->
-    <!-- <script src="https://localhost:8181/socket.io/socket.io.js"></script> ALTERAR PARA A URL DO GCP-->
     <script src="https://localhost:8181/socket.io/socket.io.js"></script>
     <script src='config.js'></script>
     <script src='utils.js'></script>
