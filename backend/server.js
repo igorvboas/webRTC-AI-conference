@@ -3,6 +3,7 @@ require('dotenv').config();
 
 const fs = require('fs');
 const https = require('https');
+const http = require('http');
 const express = require('express');
 const app = express();
 const socketio = require('socket.io');
@@ -23,10 +24,23 @@ if (!OPENAI_API_KEY) {
 const PORT = process.env.PORT || 8181;
 const FRONTEND_PORT = process.env.FRONTEND_PORT || 3000;
 
-const key = fs.readFileSync('cert.key');
-const cert = fs.readFileSync('cert.crt');
-
-const expressServer = https.createServer({key, cert}, app);
+// In Cloud Run / production, terminate TLS at the load balancer and use HTTP here
+// Use HTTPS locally only when USE_HTTPS=true and cert files are available
+let expressServer;
+const shouldUseHttps = process.env.USE_HTTPS === 'true';
+if (shouldUseHttps) {
+    try {
+        const key = fs.readFileSync('cert.key');
+        const cert = fs.readFileSync('cert.crt');
+        expressServer = https.createServer({ key, cert }, app);
+        console.log('🔒 HTTPS habilitado com certificados locais');
+    } catch (err) {
+        console.warn('⚠️ Certificados HTTPS não encontrados. Recuando para HTTP. Detalhe:', err.message);
+        expressServer = http.createServer(app);
+    }
+} else {
+    expressServer = http.createServer(app);
+}
 
 const io = socketio(expressServer, {
     cors: {
@@ -39,7 +53,7 @@ const io = socketio(expressServer, {
 
 expressServer.listen(PORT, '0.0.0.0');
 
-console.log(`🚀 Servidor rodando em https://localhost:${PORT}`);
+console.log(`🚀 Servidor rodando em ${shouldUseHttps ? 'https' : 'http'}://0.0.0.0:${PORT}`);
 console.log('📡 Sistema de Rooms ativo');
 console.log(`🔑 API Key configurada: ${OPENAI_API_KEY.substring(0, 11)}...`);
 
