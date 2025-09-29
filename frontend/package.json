@@ -2,8 +2,7 @@
   "name": "video-transcription-frontend",
   "version": "1.0.0",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start"
+    "build": "echo 'Static site - no build step required'",
+    "dev": "echo 'Static site - serve with any static server'"
   }
 }
