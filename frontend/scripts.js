@@ -4,7 +4,7 @@
 const userName = "Igor - "+Math.floor(Math.random() * 100000)
 const password = "x";
 document.querySelector('#user-name').innerHTML = userName;
-const socket = io.connect(CONFIG.BACKEND_URL || 'https://web-rtc-ai-conference.vercel.app:8181/', {
+const socket = io.connect(CONFIG.BACKEND_URL || 'https://webrtc-backend-1022548423771.us-central1.run.app', {
 //const socket = io.connect('https://localhost:8181/',{
     auth: {
         userName,password

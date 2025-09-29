@@ -200,8 +200,8 @@
     </div>
 
     <!-- Scripts -->
-    <!-- <script src="https://localhost:8181/socket.io/socket.io.js"></script> ALTERAR PARA A URL DO GCP-->
-    <script src="https://web-rtc-ai-conference.vercel.app/socket.io/socket.io.js"></script>
+    <!-- Em produção (Cloud Run), a lib do Socket.IO é servida na porta 443 (sem :8181) -->
+    <script src="https://webrtc-backend-1022548423771.us-central1.run.app/socket.io/socket.io.js"></script>
     <script src="config.js"></script>
     <script>
         // Gerar nome aleatório para o host (pode ser personalizado)
@@ -209,7 +209,7 @@
         
         // Conectar ao Socket.IO
         console.log("CONFIG.BACKEND_URL: ", CONFIG.BACKEND_URL)
-        const socket = io.connect(CONFIG.BACKEND_URL || 'https://web-rtc-ai-conference.vercel.app:8181/', {
+        const socket = io.connect(CONFIG.BACKEND_URL || 'https://webrtc-backend-1022548423771.us-central1.run.app', {
         //const socket = io.connect('https://localhost:8181/', {
             auth: {
                 userName: defaultHostName,

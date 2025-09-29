@@ -80,7 +80,7 @@ async function joinRoomAsHost() {
     logRoom('Entrando como HOST:', currentUserName);
 
     // Conectar Socket.IO
-    socket = io.connect(CONFIG.BACKEND_URL || 'https://web-rtc-ai-conference.vercel.app:8181/', {
+    socket = io.connect(CONFIG.BACKEND_URL || 'https://webrtc-backend-1022548423771.us-central1.run.app', {
         //socket = io.connect('https://localhost:8181/', {
         auth: {
             userName: currentUserName,
@@ -135,7 +135,7 @@ function joinRoomAsParticipant(participantName) {
     logRoom('Entrando como PARTICIPANTE:', currentUserName);
 
     // Conectar Socket.IO
-    socket = io.connect(CONFIG.BACKEND_URL || 'https://web-rtc-ai-conference.vercel.app:8181/', {
+    socket = io.connect(CONFIG.BACKEND_URL || 'https://webrtc-backend-1022548423771.us-central1.run.app', {
         //socket = io.connect('https://localhost:8181/', {
         auth: {
             userName: currentUserName,

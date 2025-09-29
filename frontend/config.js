@@ -12,9 +12,9 @@ const CONFIG = {
     // ------------------------ AAAAAAAAAAATENÇÃAAAAAAAAAAAAAAAOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO ------------------------
     // ------------------------ AAAAAAAAAAATENÇÃAAAAAAAAAAAAAAAOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO ------------------------
     
-    // Backend URL (local ou Vercel) 
-    //BACKEND_URL: 'https://localhost:8181', // ← TROCAR PARA https://seu-backend.gcp.app'
-    BACKEND_URL: 'https://web-rtc-ai-conference.vercel.app:8181',
+    // Backend URL (Cloud Run expõe na porta 443; não usar :8181 em produção)
+    //BACKEND_URL: 'https://localhost:8181', // ← uso local
+    BACKEND_URL: 'https://webrtc-backend-1022548423771.us-central1.run.app',
 
     // ------------------------ AAAAAAAAAAATENÇÃAAAAAAAAAAAAAAAOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO ------------------------
     // ------------------------ AAAAAAAAAAATENÇÃAAAAAAAAAAAAAAAOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO ------------------------
