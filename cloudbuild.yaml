@@ -1,7 +1,6 @@
 substitutions:
   _SERVICE_NAME: webrtc-backend
   _REGION: us-central1
-  _REPO: gcr.io/$PROJECT_ID/webrtc-backend
   _FRONTEND_URL: https://web-rtc-ai-conference-da05ulotr-igor-dev-public.vercel.app/
 
 options:
@@ -10,20 +9,20 @@ options:
 steps:
   # Build container image
   - name: gcr.io/cloud-builders/docker
-    args: ["build", "-t", "$_REPO:$SHORT_SHA", "-t", "$_REPO:latest", "backend"]
+    args: ["build", "-t", "gcr.io/$PROJECT_ID/webrtc-backend:$SHORT_SHA", "-t", "gcr.io/$PROJECT_ID/webrtc-backend:latest", "backend"]
 
   # Push image
   - name: gcr.io/cloud-builders/docker
-    args: ["push", "$_REPO:$SHORT_SHA"]
+    args: ["push", "gcr.io/$PROJECT_ID/webrtc-backend:$SHORT_SHA"]
   - name: gcr.io/cloud-builders/docker
-    args: ["push", "$_REPO:latest"]
+    args: ["push", "gcr.io/$PROJECT_ID/webrtc-backend:latest"]
 
   # Deploy to Cloud Run
   - name: gcr.io/cloud-builders/gcloud
     args:
       [
         "run","deploy","$_SERVICE_NAME",
-        "--image","$_REPO:$SHORT_SHA",
+        "--image","gcr.io/$PROJECT_ID/webrtc-backend:$SHORT_SHA",
         "--region","$_REGION",
         "--platform","managed",
         "--allow-unauthenticated",
@@ -35,8 +34,8 @@ steps:
       ]
 
 images:
-  - "$_REPO:$SHORT_SHA"
-  - "$_REPO:latest"
+  - "gcr.io/$PROJECT_ID/webrtc-backend:$SHORT_SHA"
+  - "gcr.io/$PROJECT_ID/webrtc-backend:latest"
 
 availableSecrets:
   secretManager:
