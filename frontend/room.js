@@ -52,17 +52,25 @@ document.addEventListener('DOMContentLoaded', async () => {
     const isHostFromUrl = urlRole === 'host';
     
     if (isHostFromUrl) {
-        // ✅ CORREÇÃO: Esconder modal do participante para o host
+        // ✅ Esconder modal do participante para o host
         document.getElementById('participant-form').classList.add('hide');
-        
-        // É o host - verificar se tem nome salvo
-        const savedHostName = localStorage.getItem('hostName');
-        
+
+        // É o host - verificar se tem nome salvo. Se não tiver, pedir e salvar.
+        let savedHostName = localStorage.getItem('hostName');
+
+        if (!savedHostName) {
+            const prompted = prompt('Digite seu nome (Host):');
+            if (prompted && prompted.trim()) {
+                savedHostName = prompted.trim();
+                localStorage.setItem('hostName', savedHostName);
+            }
+        }
+
         if (savedHostName) {
             currentUserName = savedHostName;
             await joinRoomAsHost();
         } else {
-            alert('Erro: Nome do host não encontrado. Crie uma nova sala.');
+            alert('Erro: Nome do host não informado. Abra a página de criar sala.');
             window.location.href = '/create-room.html';
         }
     } else {

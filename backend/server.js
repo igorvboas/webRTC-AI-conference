@@ -227,7 +227,7 @@ io.on('connection', (socket) => {
             roomUrl: `${FRONTEND_URL}/room.html?roomId=${roomId}`
         });
     });
-
+    
     // ==================== ENTRAR EM SALA ====================
     
     socket.on('joinRoom', (data, callback) => {

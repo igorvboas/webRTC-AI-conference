@@ -1,7 +1,7 @@
 substitutions:
   _SERVICE_NAME: webrtc-backend
   _REGION: us-central1
-  _FRONTEND_URL: https://web-rtc-ai-conference-da05ulotr-igor-dev-public.vercel.app/
+  _FRONTEND_URL: https://web-rtc-ai-conference.vercel.app
 
 options:
   logging: CLOUD_LOGGING_ONLY
