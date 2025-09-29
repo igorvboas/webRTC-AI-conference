@@ -14,7 +14,7 @@ const CONFIG = {
     
     // Backend URL (local ou Vercel) 
     //BACKEND_URL: 'https://localhost:8181', // ← TROCAR PARA https://seu-backend.gcp.app'
-    BACKEND_URL: 'https://webrtc-backend-1022548423771.us-central1.run.app:8181',
+    BACKEND_URL: 'https://web-rtc-ai-conference.vercel.app:8181',
 
     // ------------------------ AAAAAAAAAAATENÇÃAAAAAAAAAAAAAAAOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO ------------------------
     // ------------------------ AAAAAAAAAAATENÇÃAAAAAAAAAAAAAAAOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO ------------------------
